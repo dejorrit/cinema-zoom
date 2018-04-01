@@ -112,12 +112,10 @@ module.exports = class {
 	positionCloneOverOriginal() {
 		let original = getPositionAndDimensionsOfElement(this.original);
 
-		this.clone.style = Object.assign(this.clone.style, {
-			left: `${original.x}px`,
-			top: `${original.y}px`,
-			width: `${original.width}`,
-			height: `${original.height}`,
-		});
+		this.clone.style.left   = `${original.x}px`;
+		this.clone.style.top    = `${original.y}px`;
+		this.clone.style.width  = `${original.width}px`;
+		this.clone.style.height = `${original.height}px`;
 	}
 
 	animateCloneToCinemaModeSize() {
