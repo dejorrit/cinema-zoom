@@ -43,7 +43,7 @@ const defaults = {
 
 module.exports = class {
 
-	constructor(element, options) {
+	constructor(element, options = {}) {
 		this.original = element;
 
 		this.options = Object.assign({}, defaults, options);
