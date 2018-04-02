@@ -1,37 +1,6 @@
 require('./../css/main.scss');
-import {
-	linear,
-	inQuad,
-	outQuad,
-	inOutQuad,
-	inCube,
-	outCube,
-	inOutCube,
-	inQuart,
-	outQuart,
-	inOutQuart,
-	inQuint,
-	outQuint,
-	inOutQuint,
-	inSine,
-	outSine,
-	inOutSine,
-	inExpo,
-	outExpo,
-	inOutExpo,
-	inCirc,
-	outCirc,
-	inOutCirc,
-	inBack,
-	outBack,
-	inOutBack,
-	inBounce,
-	outBounce,
-	inOutBounce,
-	inElastic,
-	outElastic,
-	inOutElastic,
-} from './easing';
+import Pinch from './pinch';
+import animate from './animate';
 
 const defaults = {
 	duration: 350,
@@ -39,6 +8,7 @@ const defaults = {
 	zoom: true,
 	pinch: true,
 	leaveOnScroll: true,
+	backgroundOpacity: 0.75,
 };
 
 module.exports = class {
@@ -48,6 +18,18 @@ module.exports = class {
 
 		this.options = Object.assign({}, defaults, options);
 
+		this.prepareElements();
+
+		// binds
+		this._enter = this.enter.bind(this);
+		this._leave = this.leave.bind(this);
+
+		// eventListeners
+		this.original.addEventListener('click',   this._enter, true);
+		this.background.addEventListener('click', this._leave, true);
+	}
+
+	prepareElements() {
 		// add Zinch class to original
 		this.original.classList.add('zinch__original');
 
@@ -63,14 +45,6 @@ module.exports = class {
 		this.image = document.createElement('img');
 		this.image.className = 'zinch__image';
 		this.clone.append(this.image);
-
-		// binds
-		this._enter = this.enter.bind(this);
-		this._leave = this.leave.bind(this);
-
-		// eventListeners
-		this.original.addEventListener('click',   this._enter, true);
-		this.background.addEventListener('click', this._leave, true);
 	}
 
 	hideOriginal() {
@@ -90,12 +64,16 @@ module.exports = class {
 		this.hideOriginal();
 
 		setTimeout(() => {
+			if (!this.pinch) {
+				this.pinch = new Pinch(this.image);
+			}
 			window.addEventListener('scroll', this._leave, true);
 		}, this.options.duration);
 	}
 
 	leave() {
 		window.removeEventListener('scroll', this._leave, true);
+		this.pinch.reset();
 		this.animateCloneToOriginalSize();
 
 		setTimeout(() => {
@@ -144,32 +122,26 @@ module.exports = class {
 			toY = (windowHeight - toH) / 2;
 		}
 
-		requestAnimationFrame(timestamp => {
-			starttime = timestamp;
-			animateToValue(timestamp, this.clone, 'left',   fromX, window.scrollX + toX, this.options.duration);
-			animateToValue(timestamp, this.clone, 'top',    fromY, window.scrollY + toY, this.options.duration);
-			animateToValue(timestamp, this.clone, 'width',  fromW, toW, this.options.duration);
-			animateToValue(timestamp, this.clone, 'height', fromH, toH, this.options.duration);
+		animate(this.clone, 'left',   fromX, window.scrollX + toX, this.options.duration);
+		animate(this.clone, 'top',    fromY, window.scrollY + toY, this.options.duration);
+		animate(this.clone, 'width',  fromW, toW, this.options.duration);
+		animate(this.clone, 'height', fromH, toH, this.options.duration);
 
-			// animate background opacity
-			animateToValue(timestamp, this.background, 'opacity', 0, .75, this.options.duration / 2);
-		});
+		// animate background opacity
+		animate(this.background, 'opacity', 0, this.options.backgroundOpacity, this.options.duration / 2);
 	}
 
 	animateCloneToOriginalSize() {
 		let clone = getPositionAndDimensionsOfElement(this.clone);
 		let original = getPositionAndDimensionsOfElement(this.original);
 
-		requestAnimationFrame(timestamp => {
-			starttime = timestamp;
-			animateToValue(timestamp, this.clone, 'left',   clone.x,      original.x,      this.options.duration);
-			animateToValue(timestamp, this.clone, 'top',    clone.y,      original.y,      this.options.duration);
-			animateToValue(timestamp, this.clone, 'width',  clone.width,  original.width,  this.options.duration);
-			animateToValue(timestamp, this.clone, 'height', clone.height, original.height, this.options.duration);
+		animate(this.clone, 'left',   clone.x,      original.x,      this.options.duration);
+		animate(this.clone, 'top',    clone.y,      original.y,      this.options.duration);
+		animate(this.clone, 'width',  clone.width,  original.width,  this.options.duration);
+		animate(this.clone, 'height', clone.height, original.height, this.options.duration);
 
-			// animate background opacity
-			animateToValue(timestamp, this.background, 'opacity', .75, 0, this.options.duration / 2);
-		});
+		// animate background opacity
+		animate(this.background, 'opacity', this.options.backgroundOpacity, 0, this.options.duration / 2);
 	}
 
 	addCloneToDocument() {
@@ -189,29 +161,6 @@ module.exports = class {
 	}
 
 };
-
-let starttime;
-function animateToValue(timestamp, element, property, from, to, duration) {
-	timestamp = timestamp || new Date().getTime();
-	let runtime, progress, value;
-
-	runtime = timestamp - starttime;
-	progress = Math.min(runtime / duration, 1);
-
-	if (property === 'opacity') {
-		value = from + ((to - from) * progress);
-		element.style[property] = value;
-	} else {
-		value = from + ((to - from) * inOutSine(progress)); // easing
-		element.style[property] = value + 'px';
-	}
-
-	if (runtime < duration) {
-		requestAnimationFrame((timestamp) => {
-			animateToValue(timestamp, element, property, from, to, duration);
-		});
-	}
-}
 
 function getPositionAndDimensionsOfElement(element) {
 	let rect = element.getBoundingClientRect();
