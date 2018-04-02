@@ -2,9 +2,6 @@ export default class Pinch {
 
 	constructor(image) {
 		this.image = image;
-		this.zoomLevel = 0;
-
-		console.log('new');
 
 		this.image.addEventListener('touchstart', this.onTouchStart.bind(this));
 		this.image.addEventListener('touchend',   this.onTouchEnd.bind(this));
@@ -35,12 +32,11 @@ export default class Pinch {
 
 	onTouchEnd(event) {
 		if (event.timeStamp - this.touchStartTime < 250) {
-			this.zoomIn();
+			this.zoomIn(event.changedTouches[0]);
 			return false;
 		}
 
 		this.setCurrentTransformValues();
-		this.animateBackIntoBoundaries();
 	}
 
 	onTouchMove(event) {
@@ -49,24 +45,8 @@ export default class Pinch {
 		if (event.targetTouches.length === 1) {
 			this.pan(event.targetTouches[0]);
 		} if (event.targetTouches.length === 2) {
-			this.zoomByTouch(event.targetTouches[0], event.targetTouches[0]);
+			// this.zoomByTouch(event.targetTouches[0], event.targetTouches[0]);
 		}
-	}
-
-	animateBackIntoBoundaries() {
-		// let from = {
-		// 	x: this.imagePosition.x,
-		// 	y: this.imagePosition.y,
-		// 	scale: this.imageScale
-		// };
-		//
-		// let to   = {
-		// 	x: this.imagePosition.x > 0 ? 0 : this.imagePosition.x,
-		// 	y: this.imagePosition.y > 0 ? 0 : this.imagePosition.y,
-		// 	scale: this.imageScale  < 1 ? 1 : this.imageScale,
-		// };
-		//
-		// animate(this.image, from, to, 100);
 	}
 
 	pan(touch) {
@@ -78,11 +58,10 @@ export default class Pinch {
 		this.image.style.transform = `translate(${newX}px, ${newY}px) scale(${this.imageScale})`;
 	}
 
-	zoomIn() {
-		this.zoomLevel++;
-		if (this.zoomLevel === 4) {
-			this.zoomLevel = 0;
-		}
+	zoomIn(touch) {
+		let scaleFactor = 1.25;
+		let touchX = touch.clientX;
+		let touchY = touch.clientY;
 
 		let from = {
 			x: this.imagePosition.x,
@@ -91,9 +70,9 @@ export default class Pinch {
 		};
 
 		let to = {
-			x: this.imagePosition.x,
-			y: this.imagePosition.y,
-			scale: 1 + (this.zoomLevel * .5),
+			x: -(touchX / 2), // @todo take boundaries into account
+			y: -(touchY / 2), // @todo take boundaries into account
+			scale: this.imageScale * scaleFactor,
 		};
 
 		animate(this.image, from, to, 100);
@@ -101,7 +80,6 @@ export default class Pinch {
 
 	reset() {
 		this.setCurrentTransformValues();
-		this.zoomLevel = 0;
 
 		let from = {x: this.imagePosition.x, y: this.imagePosition.y, scale: this.imageScale};
 		let to   = {x: 0, y: 0, scale: 1};
