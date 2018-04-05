@@ -21,10 +21,9 @@ export default class Animation {
 	animate(timestamp) {
 		timestamp = timestamp || new Date().getTime();
 
-		let runtime  = timestamp - this.starttime;
-		let progress = Math.min(runtime / this.duration, 1);
-
-		let value = this.from + ((this.to - this.from) * inOutSine(progress));
+		let runtime  = timestamp - this.starttime,
+				progress = Math.min(runtime / this.duration, 1),
+				value = this.from + ((this.to - this.from) * inOutSine(progress));
 
 		this.element.style[this.property] = value + this.unit;
 

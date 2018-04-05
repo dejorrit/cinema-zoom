@@ -3,9 +3,7 @@ import Animation from './Animation';
 
 const defaults = {
 	duration: 350,
-	animate: true,
-	zoom: true,
-	pinch: true,
+	padding: 20,
 	leaveOnScroll: true,
 	backgroundOpacity: 0.75,
 };
@@ -15,6 +13,9 @@ module.exports = class {
 	constructor(element, options = {}) {
 		this.original = element;
 		this.image = null;
+
+		this.maxWidth  = 0;
+		this.maxHeight = 0;
 
 		this.options = Object.assign({}, defaults, options);
 
@@ -65,10 +66,12 @@ module.exports = class {
 
 		setTimeout(() => {
 			window.addEventListener('scroll', this._leave, true);
+			window.addEventListener('resize', this._leave, true);
 		}, this.options.duration);
 	}
 
 	leave() {
+		window.removeEventListener('resize', this._leave, true);
 		window.removeEventListener('scroll', this._leave, true);
 		this.animateCloneToOriginalSize();
 
@@ -93,43 +96,43 @@ module.exports = class {
 	}
 
 	animateCloneToCinemaModeSize() {
-		let clone = getPositionAndDimensionsOfElement(this.clone);
-		let fromX = clone.x;
-		let fromY = clone.y;
-		let fromW = clone.width;
-		let fromH = clone.height;
+		let clone = getPositionAndDimensionsOfElement(this.clone),
+				// let's aim for the max dimensions
+				toW = this.original.naturalWidth,
+				toH = this.original.naturalHeight,
+				// calculate ratio
+				imageRatio = toH / toW,
+				// padding
+				padding = (this.options.padding * 2);
 
-		let windowHeight = getWindowHeight();
-		let windowWidth  = getWindowWidth();
-
-		let imageRatio = fromH / fromW;
-		let windowRatio = windowHeight / windowWidth;
-		let toX, toY, toW, toH;
-
-		if (imageRatio > windowRatio) {
-			toW = (windowHeight - 60) / imageRatio;
-			toH = (windowHeight - 60);
-			toX = (windowWidth - toW) / 2;
-			toY = 30;
-		} else {
-			toW = (windowWidth - 60);
-			toH = (windowWidth - 60) * imageRatio;
-			toX = 30;
-			toY = (windowHeight - toH) / 2;
+		// scale down if the image is wider than the window
+		if (toW > getWindowWidth() - padding) {
+			toW = getWindowWidth() - padding;
+			toH = toW * imageRatio;
 		}
 
-		new Animation(this.clone, 'left',   'px', fromX, window.scrollX + toX, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'top',    'px', fromY, window.scrollY + toY, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'width',  'px', fromW, toW, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'height', 'px', fromH, toH, this.options.duration, 'inOutSine');
+		// scale down if the image is higher than the window
+		if (toH > getWindowHeight() - padding) {
+			toH = getWindowHeight() - padding;
+			toW = toH / imageRatio;
+		}
+
+		// center coordinates
+		let toX = (getWindowWidth()  - toW) / 2,
+				toY = (getWindowHeight() - toH) / 2;
+
+		new Animation(this.clone, 'left',   'px', clone.x,      window.scrollX + toX, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'top',    'px', clone.y,      window.scrollY + toY, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'width',  'px', clone.width,  toW, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'height', 'px', clone.height, toH, this.options.duration, 'inOutSine');
 
 		// animate background opacity
 		new Animation(this.background, 'opacity', '', 0, this.options.backgroundOpacity, this.options.duration / 2, 'inOutSine');
 	}
 
 	animateCloneToOriginalSize() {
-		let clone    = getPositionAndDimensionsOfElement(this.clone);
-		let original = getPositionAndDimensionsOfElement(this.original);
+		let clone    = getPositionAndDimensionsOfElement(this.clone),
+				original = getPositionAndDimensionsOfElement(this.original);
 
 		new Animation(this.clone, 'left',   'px', clone.x,      original.x,      this.options.duration, 'inOutSine');
 		new Animation(this.clone, 'top',    'px', clone.y,      original.y,      this.options.duration, 'inOutSine');
