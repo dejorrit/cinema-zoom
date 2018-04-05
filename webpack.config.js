@@ -34,7 +34,7 @@ const config = {
 			extractComments: true,
 			cache: true,
 			parallel: true,
-		})
+		}),
 	]
 };
 

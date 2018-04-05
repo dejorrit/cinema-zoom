@@ -1,6 +1,5 @@
 require('./../css/main.scss');
-import Pinch from './pinch';
-import animate from './animate';
+import Animation from './Animation';
 
 const defaults = {
 	duration: 350,
@@ -15,6 +14,7 @@ module.exports = class {
 
 	constructor(element, options = {}) {
 		this.original = element;
+		this.image = null;
 
 		this.options = Object.assign({}, defaults, options);
 
@@ -64,16 +64,12 @@ module.exports = class {
 		this.hideOriginal();
 
 		setTimeout(() => {
-			if (!this.pinch) {
-				this.pinch = new Pinch(this.image);
-			}
 			window.addEventListener('scroll', this._leave, true);
 		}, this.options.duration);
 	}
 
 	leave() {
 		window.removeEventListener('scroll', this._leave, true);
-		this.pinch.reset();
 		this.animateCloneToOriginalSize();
 
 		setTimeout(() => {
@@ -106,42 +102,42 @@ module.exports = class {
 		let windowHeight = getWindowHeight();
 		let windowWidth  = getWindowWidth();
 
-		let ratio = fromH / fromW;
+		let imageRatio = fromH / fromW;
 		let windowRatio = windowHeight / windowWidth;
 		let toX, toY, toW, toH;
 
-		if (ratio > windowRatio) {
-			toW = (windowHeight - 60) / ratio;
+		if (imageRatio > windowRatio) {
+			toW = (windowHeight - 60) / imageRatio;
 			toH = (windowHeight - 60);
 			toX = (windowWidth - toW) / 2;
 			toY = 30;
 		} else {
 			toW = (windowWidth - 60);
-			toH = (windowWidth - 60) * ratio;
+			toH = (windowWidth - 60) * imageRatio;
 			toX = 30;
 			toY = (windowHeight - toH) / 2;
 		}
 
-		animate(this.clone, 'left',   fromX, window.scrollX + toX, this.options.duration);
-		animate(this.clone, 'top',    fromY, window.scrollY + toY, this.options.duration);
-		animate(this.clone, 'width',  fromW, toW, this.options.duration);
-		animate(this.clone, 'height', fromH, toH, this.options.duration);
+		new Animation(this.clone, 'left',   'px', fromX, window.scrollX + toX, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'top',    'px', fromY, window.scrollY + toY, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'width',  'px', fromW, toW, this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'height', 'px', fromH, toH, this.options.duration, 'inOutSine');
 
 		// animate background opacity
-		animate(this.background, 'opacity', 0, this.options.backgroundOpacity, this.options.duration / 2);
+		new Animation(this.background, 'opacity', '', 0, this.options.backgroundOpacity, this.options.duration / 2, 'inOutSine');
 	}
 
 	animateCloneToOriginalSize() {
-		let clone = getPositionAndDimensionsOfElement(this.clone);
+		let clone    = getPositionAndDimensionsOfElement(this.clone);
 		let original = getPositionAndDimensionsOfElement(this.original);
 
-		animate(this.clone, 'left',   clone.x,      original.x,      this.options.duration);
-		animate(this.clone, 'top',    clone.y,      original.y,      this.options.duration);
-		animate(this.clone, 'width',  clone.width,  original.width,  this.options.duration);
-		animate(this.clone, 'height', clone.height, original.height, this.options.duration);
+		new Animation(this.clone, 'left',   'px', clone.x,      original.x,      this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'top',    'px', clone.y,      original.y,      this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'width',  'px', clone.width,  original.width,  this.options.duration, 'inOutSine');
+		new Animation(this.clone, 'height', 'px', clone.height, original.height, this.options.duration, 'inOutSine');
 
 		// animate background opacity
-		animate(this.background, 'opacity', this.options.backgroundOpacity, 0, this.options.duration / 2);
+		new Animation(this.background, 'opacity', '', this.options.backgroundOpacity, 0, this.options.duration, 'inOutSine');
 	}
 
 	addCloneToDocument() {
@@ -166,9 +162,9 @@ function getPositionAndDimensionsOfElement(element) {
 	let rect = element.getBoundingClientRect();
 
 	return {
-		x: rect.left  + window.scrollX,
-		y: rect.top + window.scrollY,
-		width: element.offsetWidth,
+		x: rect.left + window.scrollX,
+		y: rect.top  + window.scrollY,
+		width:  element.offsetWidth,
 		height: element.offsetHeight
 	}
 }
