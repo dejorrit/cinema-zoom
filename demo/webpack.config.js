@@ -1,4 +1,5 @@
 const path = require('path');
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
 const config = {
 	entry: './src/demo.js',
@@ -10,7 +11,11 @@ const config = {
 
 	},
 	plugins: [
-
+		new BrowserSyncPlugin({
+			proxy: {
+				target: 'http://localhost:63342/zinch/demo/demo.html'
+			}
+		})
 	]
 };
 
