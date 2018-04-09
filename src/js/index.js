@@ -1,10 +1,9 @@
 require('./../css/main.scss');
-import Animation from './Animation';
+import AnimateElement from 'animate-element';
 
 const defaults = {
-	duration: 350,
+	duration: 450,
 	padding: 20,
-	leaveOnScroll: true,
 	backgroundOpacity: 0.75,
 };
 
@@ -13,9 +12,6 @@ module.exports = class {
 	constructor(element, options = {}) {
 		this.original = element;
 		this.image = null;
-
-		this.maxWidth  = 0;
-		this.maxHeight = 0;
 
 		this.options = Object.assign({}, defaults, options);
 
@@ -57,17 +53,15 @@ module.exports = class {
 	}
 
 	enter() {
-		this.addBackgroundToDocument();
 		this.insertImageIntoClone();
+		this.addBackgroundToDocument();
 		this.addCloneToDocument();
 		this.positionCloneOverOriginal();
 		this.animateCloneToCinemaModeSize();
 		this.hideOriginal();
 
-		setTimeout(() => {
-			window.addEventListener('scroll', this._leave, true);
-			window.addEventListener('resize', this._leave, true);
-		}, this.options.duration);
+		window.addEventListener('scroll', this._leave, true);
+		window.addEventListener('resize', this._leave, true);
 	}
 
 	leave() {
@@ -96,13 +90,9 @@ module.exports = class {
 	}
 
 	animateCloneToCinemaModeSize() {
-		let clone = getPositionAndDimensionsOfElement(this.clone),
-				// let's aim for the max dimensions
-				toW = this.original.naturalWidth,
+		let toW = this.original.naturalWidth,
 				toH = this.original.naturalHeight,
-				// calculate ratio
 				imageRatio = toH / toW,
-				// padding
 				padding = (this.options.padding * 2);
 
 		// scale down if the image is wider than the window
@@ -121,26 +111,41 @@ module.exports = class {
 		let toX = (getWindowWidth()  - toW) / 2,
 				toY = (getWindowHeight() - toH) / 2;
 
-		new Animation(this.clone, 'left',   'px', clone.x,      window.scrollX + toX, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'top',    'px', clone.y,      window.scrollY + toY, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'width',  'px', clone.width,  toW, this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'height', 'px', clone.height, toH, this.options.duration, 'inOutSine');
+		new AnimateElement(this.clone, {
+			top:    window.scrollY + toY,
+			left:   window.scrollX + toX,
+			width:  toW,
+			height: toH,
+		}, {
+			easing: true,
+			duration: this.options.duration,
+		});
 
-		// animate background opacity
-		new Animation(this.background, 'opacity', '', 0, this.options.backgroundOpacity, this.options.duration / 2, 'inOutSine');
+		new AnimateElement(this.background, {
+			opacity: this.options.backgroundOpacity,
+		}, {
+			duration: this.options.duration / 2,
+		});
 	}
 
 	animateCloneToOriginalSize() {
-		let clone    = getPositionAndDimensionsOfElement(this.clone),
-				original = getPositionAndDimensionsOfElement(this.original);
+		let original = getPositionAndDimensionsOfElement(this.original);
 
-		new Animation(this.clone, 'left',   'px', clone.x,      original.x,      this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'top',    'px', clone.y,      original.y,      this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'width',  'px', clone.width,  original.width,  this.options.duration, 'inOutSine');
-		new Animation(this.clone, 'height', 'px', clone.height, original.height, this.options.duration, 'inOutSine');
+		new AnimateElement(this.clone, {
+			top:    original.y,
+			left:   original.x,
+			width:  original.width,
+			height: original.height,
+		}, {
+			easing: true,
+			duration: this.options.duration,
+		});
 
-		// animate background opacity
-		new Animation(this.background, 'opacity', '', this.options.backgroundOpacity, 0, this.options.duration, 'inOutSine');
+		new AnimateElement(this.background, {
+			opacity: 0,
+		}, {
+			duration: this.options.duration,
+		});
 	}
 
 	addCloneToDocument() {
