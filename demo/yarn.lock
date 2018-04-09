@@ -47,6 +47,10 @@ ajv@^6.1.0:
     json-schema-traverse "^0.3.0"
     uri-js "^3.0.2"
 
+animate-element@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/animate-element/-/animate-element-0.0.1.tgz#17fd560c8055e588deca3b1fcfedd15d5416b0b6"
+
 ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
