@@ -1,5 +1,4 @@
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
 	entry: './src/js/index.js',
@@ -27,15 +26,7 @@ const config = {
 				}]
 			}
 		]
-	},
-	plugins: [
-		new UglifyJsPlugin({
-			sourceMap: true,
-			extractComments: true,
-			cache: true,
-			parallel: true,
-		}),
-	]
+	}
 };
 
 module.exports = config;
