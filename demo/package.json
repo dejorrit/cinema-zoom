@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "watch": "webpack --watch --mode development"
+  },
   "dependencies": {
     "animate-element": "^0.0.1",
     "browser-sync": "^2.23.6",

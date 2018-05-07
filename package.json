@@ -6,6 +6,9 @@
     "dist/"
   ],
   "license": "MIT",
+  "scripts": {
+    "watch": "webpack --watch --mode development"
+  },
   "dependencies": {
     "animate-element": "^0.0.3",
     "babel": "^6.23.0",
