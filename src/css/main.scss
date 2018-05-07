@@ -1,4 +1,4 @@
-.zinch__background {
+.cinema-zoom__background {
     position: fixed;
     top: 0;
     right: 0;
@@ -12,16 +12,16 @@
     background-color: #000;
 }
 
-.zinch__original {
+.cinema-zoom__original {
     cursor: zoom-in;
 }
 
-.zinch__clone {
+.cinema-zoom__clone {
     position: absolute;
     z-index: 999999;
 }
 
-.zinch__image {
+.cinema-zoom__image {
     position: relative;
     width: 100%;
     height: 100%;

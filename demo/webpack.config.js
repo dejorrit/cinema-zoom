@@ -13,7 +13,7 @@ const config = {
 	plugins: [
 		new BrowserSyncPlugin({
 			proxy: {
-				target: 'http://localhost:63342/zinch/demo/demo.html'
+				target: 'http://localhost:63342/cinema-zoom/demo/demo.html'
 			}
 		})
 	]

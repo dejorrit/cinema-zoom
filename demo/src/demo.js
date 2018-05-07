@@ -1,8 +1,8 @@
-import Zinch from '../../dist/zinch';
+import CinemaZoom from '../../dist/cinemaZoom';
 
 let images = document.querySelectorAll('.js-image');
 images.forEach(image => {
-	new Zinch(image, {
+	new CinemaZoom(image, {
 		duration: 350
 	});
 });
