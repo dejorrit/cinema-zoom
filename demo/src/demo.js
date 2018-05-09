@@ -1,6 +1,6 @@
 import CinemaZoom from '../../dist/cinemaZoom';
 
-let images = document.querySelectorAll('[data-cinema-zoom]');
+let images = document.querySelectorAll('[data-cz-large]');
 images.forEach(image => {
 	let zoom = new CinemaZoom(image);
 

@@ -10,10 +10,10 @@ import {
 } from './Utils.js'
 
 const defaults = {
-	duration: 250,
-	padding: 20,
+	animationDuration: 250,
 	backgroundOpacity: 0.95,
 	zoomOutOnScroll: true,
+	padding: 20,
 };
 
 module.exports = class {
@@ -80,7 +80,7 @@ module.exports = class {
 				reject();
 			};
 
-			this.image.src = this.original.dataset.cinemaZoom;
+			this.image.src = this.original.dataset.czLarge;
 		});
 	}
 
@@ -96,8 +96,10 @@ module.exports = class {
 			this.animateCaptionIn(),
 		]).then(() => {
 			this.runCallback('zoomInComplete');
-			window.addEventListener('scroll', this._zoomOut, true);
 			window.addEventListener('resize', this._zoomOut, true);
+			if (this.options.zoomOutOnScroll) {
+				window.addEventListener('scroll', this._zoomOut, true);
+			}
 		});
 	}
 
@@ -106,7 +108,9 @@ module.exports = class {
 
 		// cleanup event listeners
 		window.removeEventListener('resize', this._zoomOut, true);
-		window.removeEventListener('scroll', this._zoomOut, true);
+		if (this.options.zoomOutOnScroll) {
+			window.removeEventListener('scroll', this._zoomOut, true);
+		}
 
 		await Promise.all([
 			this.animateBackgroundOut(),
@@ -131,7 +135,7 @@ module.exports = class {
 	animateCloneIn() {
 		return new AnimateElement(this.clone, this.getDestinationPositionAndCoordinates(), {
 			easing: true,
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
@@ -145,7 +149,7 @@ module.exports = class {
 			height: original.height,
 		}, {
 			easing: true,
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
@@ -153,7 +157,7 @@ module.exports = class {
 		return new AnimateElement(this.background, {
 			opacity: this.options.backgroundOpacity,
 		}, {
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
@@ -161,7 +165,7 @@ module.exports = class {
 		return new AnimateElement(this.background, {
 			opacity: 0,
 		}, {
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
@@ -170,7 +174,7 @@ module.exports = class {
 			bottom: 0,
 		}, {
 			easing: true,
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
@@ -179,7 +183,7 @@ module.exports = class {
 			bottom: -this.caption.offsetHeight,
 		}, {
 			easing: true,
-			duration: this.options.duration,
+			duration: this.options.animationDuration,
 		});
 	}
 
