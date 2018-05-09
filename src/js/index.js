@@ -11,7 +11,7 @@ import {
 
 const defaults = {
 	duration: 250,
-	padding: 60,
+	padding: 20,
 	backgroundOpacity: 0.95,
 	zoomOutOnScroll: true,
 };
@@ -188,6 +188,7 @@ module.exports = class {
 		let height = this.image.naturalHeight;
 		let imageRatio = height / width;
 		let padding = this.options.padding * 2;
+		let captionHeight = this.caption.offsetHeight;
 
 		// scale down if the image is wider than the window
 		if (width > getWindowWidth() - padding) {
@@ -196,8 +197,8 @@ module.exports = class {
 		}
 
 		// scale down if the image is higher than the window
-		if (height > getWindowHeight() - padding) {
-			height = getWindowHeight() - padding;
+		if (height > getWindowHeight() - padding - (captionHeight + padding)) {
+			height = getWindowHeight() - padding - (captionHeight + padding);
 			width  = height / imageRatio;
 		}
 

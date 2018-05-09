@@ -30,10 +30,10 @@
 
 .cinema-zoom__caption {
   position: fixed;
-  right: 0;
   bottom: 0;
-  left: 0;
+  left: 50%;
 
+  max-width: 800px;
   padding: 15px;
 
   font-family: 'Arial', sans-serif;
@@ -42,4 +42,9 @@
   text-align: center;
 
   z-index: 999999;
+  transform: translateX(-50%);
+
+  &:empty {
+    display: none;
+  }
 }
