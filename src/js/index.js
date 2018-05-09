@@ -1,12 +1,19 @@
 require('./../css/main.scss');
-import AnimateElement from 'animate-element';
-import {createElement, getPositionAndDimensionsOfElement, getWindowHeight, getWindowWidth} from './Utils.js'
+import AnimateElement from './../../../animate-element/dist/animate-element';
+import {
+	createElement,
+	getPositionAndDimensionsOfElement,
+	getWindowHeight,
+	getWindowWidth,
+	getScrollX,
+	getScrollY
+} from './Utils.js'
 
 const defaults = {
-	duration: 450,
-	padding: 20,
+	duration: 250,
+	padding: 60,
 	backgroundOpacity: 0.95,
-	largeImage: false,
+	zoomOutOnScroll: true,
 };
 
 module.exports = class {
@@ -20,15 +27,17 @@ module.exports = class {
 		this.createElements();
 
 		this._onClickOriginal   = this.onClickOriginal.bind(this);
-		this._onClickBackground = this.onClickBackground.bind(this);
+		this._zoomOut = this.zoomOut.bind(this);
 
 		this.original.addEventListener('click',   this._onClickOriginal,  true);
-		this.background.addEventListener('click', this._onClickBackground, true);
+		this.background.addEventListener('click', this._zoomOut, true);
 	}
 
 	createElements() {
 		this.background = createElement('div', 'cinema-zoom__background');
 		this.clone      = createElement('div', 'cinema-zoom__clone');
+		this.caption    = createElement('div', 'cinema-zoom__caption');
+		this.caption.innerHTML = this.original.getAttribute('title');
 
 		this.original.classList.add('cinema-zoom__original');
 	}
@@ -44,10 +53,6 @@ module.exports = class {
 		} else {
 			this.zoomIn();
 		}
-	}
-
-	onClickBackground() {
-		this.zoomOut();
 	}
 
 	hideOriginal() {
@@ -75,50 +80,46 @@ module.exports = class {
 				reject();
 			};
 
-			this.image.src = this.options.largeImage;
+			this.image.src = this.original.dataset.cinemaZoom;
 		});
 	}
 
-	zoomIn() {
+	async zoomIn() {
 		this.runCallback('zoomInStart');
-
+		this.addElementsToDocumentBody();
+		this.positionCloneOnOriginal();
 		this.hideOriginal();
 
-		this.addBackgroundToDocument();
-		this.animateBackgroundToVisible();
-
-		this.addCloneToDocument();
-		this.positionCloneOverOriginal();
-		this.animateCloneToCinemaModeSize();
-
-		setTimeout(() => {
+		await Promise.all([
+			this.animateBackgroundIn(),
+			this.animateCloneIn(),
+			this.animateCaptionIn(),
+		]).then(() => {
 			this.runCallback('zoomInComplete');
-
-			// cleanup event listeners
-			window.addEventListener('scroll', this._onClickBackground, true);
-			window.addEventListener('resize', this._onClickBackground, true);
-		}, this.options.duration);
+			window.addEventListener('scroll', this._zoomOut, true);
+			window.addEventListener('resize', this._zoomOut, true);
+		});
 	}
 
-	zoomOut() {
+	async zoomOut() {
 		this.runCallback('zoomOutStart');
-		this.animateBackgroundToInvisible();
-		this.animateCloneToOriginalSize();
-
-		setTimeout(() => {
-			this.showOriginal();
-			this.removeBackgroundFromDocument();
-			this.removeCloneFromDocument();
-
-			this.runCallback('zoomOutComplete');
-		}, this.options.duration);
 
 		// cleanup event listeners
-		window.removeEventListener('resize', this._onClickBackground, true);
-		window.removeEventListener('scroll', this._onClickBackground, true);
+		window.removeEventListener('resize', this._zoomOut, true);
+		window.removeEventListener('scroll', this._zoomOut, true);
+
+		await Promise.all([
+			this.animateBackgroundOut(),
+			this.animateCloneOut(),
+			this.animateCaptionOut(),
+		]).then(() => {
+			this.runCallback('zoomOutComplete');
+			this.removeElementsFromDocumentBody();
+			this.showOriginal();
+		});
 	}
 
-	positionCloneOverOriginal() {
+	positionCloneOnOriginal() {
 		let original = getPositionAndDimensionsOfElement(this.original);
 
 		this.clone.style.left   = `${original.x}px`;
@@ -127,39 +128,57 @@ module.exports = class {
 		this.clone.style.height = `${original.height}px`;
 	}
 
-	animateCloneToCinemaModeSize() {
-		new AnimateElement(this.clone, this.getDestinationPositionAndCoordinates(), {
+	animateCloneIn() {
+		return new AnimateElement(this.clone, this.getDestinationPositionAndCoordinates(), {
 			easing: true,
 			duration: this.options.duration,
 		});
 	}
 
-	animateBackgroundToVisible() {
-		new AnimateElement(this.background, {
+	animateCloneOut() {
+		let original = getPositionAndDimensionsOfElement(this.original);
+
+		return new AnimateElement(this.clone, {
+			top:    original.y,
+			left:   original.x,
+			width:  original.width,
+			height: original.height,
+		}, {
+			easing: true,
+			duration: this.options.duration,
+		});
+	}
+
+	animateBackgroundIn() {
+		return new AnimateElement(this.background, {
 			opacity: this.options.backgroundOpacity,
 		}, {
 			duration: this.options.duration,
 		});
 	}
 
-	animateCloneToOriginalSize() {
-		let original = getPositionAndDimensionsOfElement(this.original);
-
-		new AnimateElement(this.clone, {
-			top:    original.y,
-			left:   original.x,
-			width:  original.width,
-			height: original.height,
+	animateBackgroundOut() {
+		return new AnimateElement(this.background, {
+			opacity: 0,
 		}, {
-			easing: false,
 			duration: this.options.duration,
 		});
 	}
 
-	animateBackgroundToInvisible() {
-		new AnimateElement(this.background, {
-			opacity: 0,
+	animateCaptionIn() {
+		return new AnimateElement(this.caption, {
+			bottom: 0,
 		}, {
+			easing: true,
+			duration: this.options.duration,
+		});
+	}
+
+	animateCaptionOut() {
+		return new AnimateElement(this.caption, {
+			bottom: -this.caption.offsetHeight,
+		}, {
+			easing: true,
 			duration: this.options.duration,
 		});
 	}
@@ -187,27 +206,25 @@ module.exports = class {
 		let top  = (getWindowHeight() - height) / 2;
 
 		return {
-			top:  window.scrollY + top,
-			left: window.scrollX + left,
-			width,
-			height,
+			top:    Math.round(getScrollY() + top,  10),
+			left:   Math.round(getScrollX() + left, 10),
+			width:  Math.round(width, 10),
+			height: Math.round(height, 10),
 		}
 	}
 
-	addCloneToDocument() {
-		document.body.append(this.clone);
-	}
-
-	removeCloneFromDocument() {
-		this.clone.parentNode.removeChild(this.clone);
-	}
-
-	addBackgroundToDocument() {
+	addElementsToDocumentBody() {
 		document.body.append(this.background);
+		document.body.append(this.caption);
+		document.body.append(this.clone);
+
+		this.caption.style.bottom = `-${this.caption.offsetHeight}px`;
 	}
 
-	removeBackgroundFromDocument() {
+	removeElementsFromDocumentBody() {
 		this.background.parentNode.removeChild(this.background);
+		this.caption.parentNode.removeChild(this.caption);
+		this.clone.parentNode.removeChild(this.clone);
 	}
 
 	// register events
