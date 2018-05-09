@@ -1,5 +1,5 @@
 require('./../css/main.scss');
-import AnimateElement from './../../../animate-element/dist/animate-element';
+import AnimateElement from 'animate-element';
 import {
 	createElement,
 	getPositionAndDimensionsOfElement,
