@@ -1,13 +1,24 @@
 {
-  "name": "zinch",
+  "name": "cinema-zoom",
+  "keywords": [
+    "image",
+    "zoom",
+    "image-zoom",
+    "imagezoom",
+    "cinema"
+  ],
+  "description": "Zoom images to cinema mode",
   "version": "0.0.1",
+  "repository": "https://github.com/dejorrit/cinema-zoom",
+  "author": "Jorrit Tinholt",
+  "license": "MIT",
   "main": "dist/cinemaZoom.js",
   "files": [
     "dist/"
   ],
-  "license": "MIT",
   "scripts": {
-    "watch": "webpack --watch --mode development"
+    "watch": "webpack --watch --mode development",
+    "build": "webpack --mode production"
   },
   "dependencies": {
     "animate-element": "^0.0.4",
