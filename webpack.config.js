@@ -3,8 +3,8 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
 	entry: {
-		'cinemaZoom': './src/js/index.js',
-		'cinemaZoom.min': './src/js/index.js',
+		'cinema-zoom': './src/js/index.js',
+		'cinema-zoom.min': './src/js/index.js',
 	},
 	output: {
 		path: path.resolve(__dirname, 'dist'),
