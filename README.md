@@ -35,7 +35,7 @@ import 'cinema-zoom';
 Add a `data-cz-zoom` data attribute with a path to a larger version of the the image you want to zoom. 
 
 ```html
-<img src="path/to/image/png" data-cz-zoom="/path/to/larger/image.png"/> 
+<img src="path/to/image.png" data-cz-zoom="/path/to/larger/image.png"/> 
 ```
 
 That's all :)
