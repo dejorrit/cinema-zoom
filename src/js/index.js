@@ -7,7 +7,9 @@ import {
 	getWindowWidth,
 	getScrollX,
 	getScrollY
-} from './utils.js'
+} from './utils.js';
+
+const PADDING = 10;
 
 class CinemaZoom {
 
@@ -16,10 +18,9 @@ class CinemaZoom {
 		this.image     = null;
 
 		this.options   = {
-			animationDuration: element.dataset.czAnimationDuration || 200,
-			backgroundOpacity: element.dataset.czBackgroundOpacity || 1,
-			zoomOutOnScroll:   element.dataset.czZoomOutOnScroll   || true,
-			padding:           element.dataset.czPadding           || 20,
+			transitionDuration: element.dataset.czTransitionDuration || 200,
+			backgroundOpacity:  element.dataset.czBackgroundOpacity  || 1,
+			zoomOutOnScroll:    element.dataset.czZoomOutOnScroll    || true,
 		};
 
 		this.createElements();
@@ -123,8 +124,7 @@ class CinemaZoom {
 
 	animateCloneIn() {
 		return new AnimateElement(this.clone, this.getDestinationPositionAndCoordinates(), {
-			easing: true,
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -137,8 +137,7 @@ class CinemaZoom {
 			width:  original.width,
 			height: original.height,
 		}, {
-			easing: true,
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -146,7 +145,7 @@ class CinemaZoom {
 		return new AnimateElement(this.background, {
 			opacity: this.options.backgroundOpacity,
 		}, {
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -154,7 +153,7 @@ class CinemaZoom {
 		return new AnimateElement(this.background, {
 			opacity: 0,
 		}, {
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -162,8 +161,7 @@ class CinemaZoom {
 		return new AnimateElement(this.caption, {
 			bottom: 0,
 		}, {
-			easing: true,
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -171,8 +169,7 @@ class CinemaZoom {
 		return new AnimateElement(this.caption, {
 			bottom: -this.caption.offsetHeight,
 		}, {
-			easing: true,
-			duration: this.options.animationDuration,
+			duration: this.options.transitionDuration,
 		});
 	}
 
@@ -180,7 +177,7 @@ class CinemaZoom {
 		let width  = this.image.naturalWidth;
 		let height = this.image.naturalHeight;
 		let imageRatio = height / width;
-		let padding = this.options.padding * 2;
+		let padding = PADDING * 2;
 		let captionHeight = this.caption.offsetHeight;
 
 		// scale down if the image is wider than the window
