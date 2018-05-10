@@ -9,20 +9,19 @@ import {
 	getScrollY
 } from './utils.js'
 
-const defaults = {
-	animationDuration: 200,
-	backgroundOpacity: 1,
-	zoomOutOnScroll: true,
-	padding: 20,
-};
+class CinemaZoom {
 
-module.exports = class {
-
-	constructor(element, options = {}) {
+	constructor(element) {
 		this.original  = element;
 		this.image     = null;
 		this.callbacks = new Map();
-		this.options   = Object.assign({}, defaults, options);
+
+		this.options   = {
+			animationDuration: element.dataset.czAnimationDuration || 200,
+			backgroundOpacity: element.dataset.czBackgroundOpacity || 1,
+			zoomOutOnScroll:   element.dataset.czZoomOutOnScroll   || true,
+			padding:           element.dataset.czPadding           || 20,
+		};
 
 		this.createElements();
 
@@ -80,7 +79,7 @@ module.exports = class {
 				reject();
 			};
 
-			this.image.src = this.original.dataset.czLarge;
+			this.image.src = this.original.dataset.czZoom;
 		});
 	}
 
@@ -257,4 +256,16 @@ module.exports = class {
 		}
 	}
 
-};
+}
+
+// run on all cz-zoom images
+(function () {
+	let images = Array.from(document.querySelectorAll('[data-cz-zoom]'));
+	images.forEach(image => {
+		if (image.nodeName !== 'IMG') {
+			return false;
+		}
+
+		new CinemaZoom(image);
+	});
+})();
