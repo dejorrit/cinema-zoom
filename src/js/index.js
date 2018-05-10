@@ -7,11 +7,11 @@ import {
 	getWindowWidth,
 	getScrollX,
 	getScrollY
-} from './Utils.js'
+} from './utils.js'
 
 const defaults = {
-	animationDuration: 250,
-	backgroundOpacity: 0.95,
+	animationDuration: 200,
+	backgroundOpacity: 1,
 	zoomOutOnScroll: true,
 	padding: 20,
 };
