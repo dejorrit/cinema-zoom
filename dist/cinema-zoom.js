@@ -100,19 +100,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 __webpack_require__(3);
 
+
+var PADDING = 10;
+
 var CinemaZoom = function () {
 	function CinemaZoom(element) {
 		_classCallCheck(this, CinemaZoom);
 
 		this.original = element;
 		this.image = null;
-		this.callbacks = new Map();
 
 		this.options = {
-			animationDuration: element.dataset.czAnimationDuration || 200,
+			transitionDuration: element.dataset.czTransitionDuration || 200,
 			backgroundOpacity: element.dataset.czBackgroundOpacity || 1,
-			zoomOutOnScroll: element.dataset.czZoomOutOnScroll || true,
-			padding: element.dataset.czPadding || 20
+			zoomOutOnScroll: element.dataset.czZoomOutOnScroll || true
 		};
 
 		this.createElements();
@@ -165,19 +166,15 @@ var CinemaZoom = function () {
 		value: function createAndLoadImage() {
 			var _this2 = this;
 
-			this.runCallback('imageLoadStart');
-
 			return new Promise(function (resolve, reject) {
 				_this2.image = new Image();
 				_this2.image.className = 'cinema-zoom__image';
 
 				_this2.image.onload = function () {
-					_this2.runCallback('imageLoadComplete');
 					resolve();
 				};
 
 				_this2.image.onerror = function () {
-					_this2.runCallback('imageLoadError');
 					reject();
 				};
 
@@ -189,13 +186,11 @@ var CinemaZoom = function () {
 		value: async function zoomIn() {
 			var _this3 = this;
 
-			this.runCallback('zoomInStart');
 			this.addElementsToDocumentBody();
 			this.positionCloneOnOriginal();
 			this.hideOriginal();
 
 			await Promise.all([this.animateBackgroundIn(), this.animateCloneIn(), this.animateCaptionIn()]).then(function () {
-				_this3.runCallback('zoomInComplete');
 				window.addEventListener('resize', _this3._zoomOut, true);
 				if (_this3.options.zoomOutOnScroll) {
 					window.addEventListener('scroll', _this3._zoomOut, true);
@@ -207,8 +202,6 @@ var CinemaZoom = function () {
 		value: async function zoomOut() {
 			var _this4 = this;
 
-			this.runCallback('zoomOutStart');
-
 			// cleanup event listeners
 			window.removeEventListener('resize', this._zoomOut, true);
 			if (this.options.zoomOutOnScroll) {
@@ -216,7 +209,6 @@ var CinemaZoom = function () {
 			}
 
 			await Promise.all([this.animateBackgroundOut(), this.animateCloneOut(), this.animateCaptionOut()]).then(function () {
-				_this4.runCallback('zoomOutComplete');
 				_this4.removeElementsFromDocumentBody();
 				_this4.showOriginal();
 			});
@@ -235,8 +227,7 @@ var CinemaZoom = function () {
 		key: 'animateCloneIn',
 		value: function animateCloneIn() {
 			return new _animateElement2.default(this.clone, this.getDestinationPositionAndCoordinates(), {
-				easing: true,
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -250,8 +241,7 @@ var CinemaZoom = function () {
 				width: original.width,
 				height: original.height
 			}, {
-				easing: true,
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -260,7 +250,7 @@ var CinemaZoom = function () {
 			return new _animateElement2.default(this.background, {
 				opacity: this.options.backgroundOpacity
 			}, {
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -269,7 +259,7 @@ var CinemaZoom = function () {
 			return new _animateElement2.default(this.background, {
 				opacity: 0
 			}, {
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -278,8 +268,7 @@ var CinemaZoom = function () {
 			return new _animateElement2.default(this.caption, {
 				bottom: 0
 			}, {
-				easing: true,
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -288,8 +277,7 @@ var CinemaZoom = function () {
 			return new _animateElement2.default(this.caption, {
 				bottom: -this.caption.offsetHeight
 			}, {
-				easing: true,
-				duration: this.options.animationDuration
+				duration: this.options.transitionDuration
 			});
 		}
 	}, {
@@ -298,7 +286,7 @@ var CinemaZoom = function () {
 			var width = this.image.naturalWidth;
 			var height = this.image.naturalHeight;
 			var imageRatio = height / width;
-			var padding = this.options.padding * 2;
+			var padding = PADDING * 2;
 			var captionHeight = this.caption.offsetHeight;
 
 			// scale down if the image is wider than the window
@@ -339,44 +327,6 @@ var CinemaZoom = function () {
 			this.background.parentNode.removeChild(this.background);
 			this.caption.parentNode.removeChild(this.caption);
 			this.clone.parentNode.removeChild(this.clone);
-		}
-
-		// register events
-
-	}, {
-		key: 'on',
-		value: function on(event, callback) {
-			this.callbacks.set(event, callback);
-		}
-
-		// remove registered events
-
-	}, {
-		key: 'off',
-		value: function off(event) {
-			if (this.callbacks.has(event)) {
-				this.callbacks.delete(event);
-			}
-		}
-
-		// running callbacks
-
-	}, {
-		key: 'runCallback',
-		value: function runCallback(eventName) {
-			var _this5 = this;
-
-			var delay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-			if (this.callbacks.has(eventName) && typeof this.callbacks.get(eventName) === 'function') {
-				if (delay > 0) {
-					setTimeout(function () {
-						_this5.callbacks.get(eventName)();
-					}, delay);
-				} else {
-					this.callbacks.get(eventName)();
-				}
-			}
 		}
 	}]);
 
