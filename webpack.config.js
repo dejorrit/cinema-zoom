@@ -33,9 +33,7 @@ const config = {
 			test: /\.min.js$/,
 			cache: true,
 			parallel: true,
-			uglifyOptions: {
-				toplevel: true,
-			}
+			extractComments: true,
 		})
 	]
 };
