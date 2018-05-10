@@ -14,7 +14,6 @@ class CinemaZoom {
 	constructor(element) {
 		this.original  = element;
 		this.image     = null;
-		this.callbacks = new Map();
 
 		this.options   = {
 			animationDuration: element.dataset.czAnimationDuration || 200,
@@ -63,19 +62,15 @@ class CinemaZoom {
 	}
 
 	createAndLoadImage() {
-		this.runCallback('imageLoadStart');
-
 		return new Promise((resolve, reject) => {
 			this.image = new Image();
 			this.image.className = 'cinema-zoom__image';
 
 			this.image.onload = () => {
-				this.runCallback('imageLoadComplete');
 				resolve();
 			};
 
 			this.image.onerror = () => {
-				this.runCallback('imageLoadError');
 				reject();
 			};
 
@@ -84,7 +79,6 @@ class CinemaZoom {
 	}
 
 	async zoomIn() {
-		this.runCallback('zoomInStart');
 		this.addElementsToDocumentBody();
 		this.positionCloneOnOriginal();
 		this.hideOriginal();
@@ -94,7 +88,6 @@ class CinemaZoom {
 			this.animateCloneIn(),
 			this.animateCaptionIn(),
 		]).then(() => {
-			this.runCallback('zoomInComplete');
 			window.addEventListener('resize', this._zoomOut, true);
 			if (this.options.zoomOutOnScroll) {
 				window.addEventListener('scroll', this._zoomOut, true);
@@ -103,8 +96,6 @@ class CinemaZoom {
 	}
 
 	async zoomOut() {
-		this.runCallback('zoomOutStart');
-
 		// cleanup event listeners
 		window.removeEventListener('resize', this._zoomOut, true);
 		if (this.options.zoomOutOnScroll) {
@@ -116,7 +107,6 @@ class CinemaZoom {
 			this.animateCloneOut(),
 			this.animateCaptionOut(),
 		]).then(() => {
-			this.runCallback('zoomOutComplete');
 			this.removeElementsFromDocumentBody();
 			this.showOriginal();
 		});
@@ -229,31 +219,6 @@ class CinemaZoom {
 		this.background.parentNode.removeChild(this.background);
 		this.caption.parentNode.removeChild(this.caption);
 		this.clone.parentNode.removeChild(this.clone);
-	}
-
-	// register events
-	on(event, callback) {
-		this.callbacks.set(event, callback);
-	}
-
-	// remove registered events
-	off(event) {
-		if (this.callbacks.has(event)) {
-			this.callbacks.delete(event);
-		}
-	}
-
-	// running callbacks
-	runCallback(eventName, delay = 0) {
-		if (this.callbacks.has(eventName) && typeof this.callbacks.get(eventName) === 'function') {
-			if (delay > 0) {
-				setTimeout(() => {
-					this.callbacks.get(eventName)();
-				}, delay);
-			} else {
-				this.callbacks.get(eventName)();
-			}
-		}
 	}
 
 }
