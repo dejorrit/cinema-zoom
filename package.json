@@ -12,7 +12,7 @@
   "repository": "https://github.com/dejorrit/cinema-zoom",
   "author": "Jorrit Tinholt",
   "license": "MIT",
-  "main": "dist/cinemaZoom.js",
+  "main": "dist/cinema-zoom.min.js",
   "files": [
     "dist/"
   ],
