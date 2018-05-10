@@ -17,8 +17,8 @@
     "dist/"
   ],
   "scripts": {
-    "watch": "webpack --watch --mode development",
-    "build": "webpack --mode production"
+    "watch": "webpack --mode development --watch",
+    "build": "webpack --mode none"
   },
   "dependencies": {
     "animate-element": "^0.0.4",
@@ -31,7 +31,7 @@
     "raw-loader": "^0.5.1",
     "sass-loader": "^6.0.7",
     "style-loader": "^0.20.3",
-    "uglifyjs-webpack-plugin": "^1.2.4",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^4.4.1",
     "webpack-cli": "^2.0.13"
   }
