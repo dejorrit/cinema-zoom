@@ -1,6 +1,5 @@
 require('./../css/main.scss');
 import AnimateElement from 'animate-element';
-import 'babel-polyfill';
 import {
 	createElement,
 	getPositionAndDimensionsOfElement,
