@@ -1,5 +1,6 @@
 require('./../css/main.scss');
 import AnimateElement from 'animate-element';
+import 'babel-polyfill';
 import {
 	createElement,
 	getPositionAndDimensionsOfElement,
@@ -18,9 +19,9 @@ class CinemaZoom {
 		this.image     = null;
 
 		this.options   = {
-			transitionDuration: element.dataset.czTransitionDuration || 200,
-			backgroundOpacity:  element.dataset.czBackgroundOpacity  || 1,
-			zoomOutOnScroll:    element.dataset.czZoomOutOnScroll    || true,
+			transitionDuration: element.getAttribute('data-cz-transition-duration') || 200,
+			backgroundOpacity:  element.getAttribute('data-cz-background-opacity')  || 1,
+			zoomOutOnScroll:    element.getAttribute('data-cz-zoom-out-on-scroll')  || true,
 		};
 
 		this.createElements();
@@ -75,7 +76,7 @@ class CinemaZoom {
 				reject();
 			};
 
-			this.image.src = this.original.dataset.czZoom;
+			this.image.src = this.original.getAttribute('data-cz-zoom');
 		});
 	}
 
@@ -205,9 +206,9 @@ class CinemaZoom {
 	}
 
 	addElementsToDocumentBody() {
-		document.body.append(this.background);
-		document.body.append(this.caption);
-		document.body.append(this.clone);
+		document.body.appendChild(this.background);
+		document.body.appendChild(this.caption);
+		document.body.appendChild(this.clone);
 
 		this.caption.style.bottom = `-${this.caption.offsetHeight}px`;
 	}

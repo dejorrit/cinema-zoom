@@ -3,7 +3,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
 	entry: {
-		'cinema-zoom': './src/js/index.js',
+		'cinema-zoom':     './src/js/index.js',
 		'cinema-zoom.min': './src/js/index.js',
 	},
 	output: {
@@ -15,16 +15,16 @@ const config = {
 		rules: [{
 			test: /\.js$/,
 			use: [{
-				loader: "babel-loader",
+				loader: 'babel-loader',
 			}]
 		}, {
 			test: /\.scss$/,
 			use: [{
-				loader: "style-loader"
+				loader: 'style-loader'
 			}, {
-				loader: "css-loader"
+				loader: 'css-loader'
 			}, {
-				loader: "sass-loader"
+				loader: 'sass-loader'
 			}]
 		}]
 	},
