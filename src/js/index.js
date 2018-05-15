@@ -218,7 +218,7 @@ class CinemaZoom {
 }
 
 (function () {
-	let images = document.querySelectorAll('[data-cz-zoom]');
+	let images = Array.from(document.querySelectorAll('[data-cz-zoom]'));
 	images.forEach(image => {
 		if (image.nodeName !== 'IMG') {
 			return false;
