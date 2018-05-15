@@ -1,6 +1,5 @@
 require('./../css/main.scss');
 
-import 'babel-polyfill';
 import AnimateElement from './animate-element';
 import {
 	createElement,
@@ -218,7 +217,7 @@ class CinemaZoom {
 }
 
 (function () {
-	let images = Array.from(document.querySelectorAll('[data-cz-zoom]'));
+	let images = document.querySelectorAll('[data-cz-zoom]');
 	images.forEach(image => {
 		if (image.nodeName !== 'IMG') {
 			return false;
