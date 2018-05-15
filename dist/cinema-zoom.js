@@ -554,7 +554,7 @@ var CinemaZoom = function () {
 }();
 
 (function () {
-	var images = document.querySelectorAll('[data-cz-zoom]');
+	var images = Array.from(document.querySelectorAll('[data-cz-zoom]'));
 	images.forEach(function (image) {
 		if (image.nodeName !== 'IMG') {
 			return false;
