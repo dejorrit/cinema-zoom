@@ -1,5 +1,7 @@
 require('./../css/main.scss');
-import AnimateElement from 'animate-element';
+
+import 'babel-polyfill';
+import AnimateElement from './animate-element';
 import {
 	createElement,
 	getPositionAndDimensionsOfElement,
@@ -10,18 +12,14 @@ import {
 } from './utils.js';
 
 const PADDING = 10;
+const TRANSITION_DURATION = 300;
+const BACKGROUND_OPACITY  = 1;
 
 class CinemaZoom {
 
 	constructor(element) {
 		this.original  = element;
 		this.image     = null;
-
-		this.options   = {
-			transitionDuration: element.getAttribute('data-cz-transition-duration') || 200,
-			backgroundOpacity:  element.getAttribute('data-cz-background-opacity')  || 1,
-			zoomOutOnScroll:    element.getAttribute('data-cz-zoom-out-on-scroll')  || true,
-		};
 
 		this.createElements();
 
@@ -36,22 +34,23 @@ class CinemaZoom {
 		this.background = createElement('div', 'cinema-zoom__background');
 		this.clone      = createElement('div', 'cinema-zoom__clone');
 		this.caption    = createElement('div', 'cinema-zoom__caption');
-		this.caption.innerHTML = this.original.getAttribute('title');
+		this.image      = createElement('img', 'cinema-zoom__image');
+
+		this.clone.appendChild(this.image);
+
+		if (this.original.getAttribute('title')) {
+			this.caption.innerHTML = this.original.getAttribute('title');
+		}
 
 		this.original.classList.add('cinema-zoom__original');
 	}
 
 	onClickOriginal() {
-		if (!this.image) {
-			this.createAndLoadImage().then(() => {
-				this.clone.append(this.image);
-				this.zoomIn();
-			}).catch(() => {
-				throw new Error('Error loading large version of image');
-			});
-		} else {
+		this.loadLargeImage().then(() => {
 			this.zoomIn();
-		}
+		}).catch(() => {
+			throw new Error('Error loading large version of image');
+		});
 	}
 
 	hideOriginal() {
@@ -62,10 +61,12 @@ class CinemaZoom {
 		this.original.style.visibility = 'visible';
 	}
 
-	createAndLoadImage() {
+	loadLargeImage() {
 		return new Promise((resolve, reject) => {
-			this.image = new Image();
-			this.image.className = 'cinema-zoom__image';
+			if (this.image.src) {
+				resolve();
+				return;
+			}
 
 			this.image.onload = () => {
 				resolve();
@@ -90,18 +91,14 @@ class CinemaZoom {
 			this.animateCaptionIn(),
 		]).then(() => {
 			window.addEventListener('resize', this._zoomOut, true);
-			if (this.options.zoomOutOnScroll) {
-				window.addEventListener('scroll', this._zoomOut, true);
-			}
+			window.addEventListener('scroll', this._zoomOut, true);
 		});
 	}
 
 	async zoomOut() {
 		// cleanup event listeners
 		window.removeEventListener('resize', this._zoomOut, true);
-		if (this.options.zoomOutOnScroll) {
-			window.removeEventListener('scroll', this._zoomOut, true);
-		}
+		window.removeEventListener('scroll', this._zoomOut, true);
 
 		await Promise.all([
 			this.animateBackgroundOut(),
@@ -124,7 +121,7 @@ class CinemaZoom {
 
 	animateCloneIn() {
 		return new AnimateElement(this.clone, this.getDestinationPositionAndCoordinates(), {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
@@ -137,15 +134,15 @@ class CinemaZoom {
 			width:  original.width,
 			height: original.height,
 		}, {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
 	animateBackgroundIn() {
 		return new AnimateElement(this.background, {
-			opacity: this.options.backgroundOpacity,
+			opacity: BACKGROUND_OPACITY,
 		}, {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
@@ -153,7 +150,7 @@ class CinemaZoom {
 		return new AnimateElement(this.background, {
 			opacity: 0,
 		}, {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
@@ -161,7 +158,7 @@ class CinemaZoom {
 		return new AnimateElement(this.caption, {
 			bottom: 0,
 		}, {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
@@ -169,7 +166,7 @@ class CinemaZoom {
 		return new AnimateElement(this.caption, {
 			bottom: -this.caption.offsetHeight,
 		}, {
-			duration: this.options.transitionDuration,
+			duration: TRANSITION_DURATION,
 		});
 	}
 
@@ -220,7 +217,6 @@ class CinemaZoom {
 
 }
 
-// run on all cz-zoom images
 (function () {
 	let images = Array.from(document.querySelectorAll('[data-cz-zoom]'));
 	images.forEach(image => {
